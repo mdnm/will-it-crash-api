@@ -32,6 +32,9 @@ jobs:
   test:
     if: github.event_name == 'push'
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./check-guess-service
     steps:
       - uses: actions/checkout@v2
       - name: Install dependencies
