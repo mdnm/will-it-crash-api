@@ -8,7 +8,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       CodeUri: src/
-      Handler: src/check-guess-service/index.checkGuessServiceHandler
+      Handler: src/index.checkGuessServiceHandler
       Runtime: nodejs16.x
       Architectures:
         - x86_64
@@ -32,7 +32,7 @@ Resources:
         Target: "es2020"
         Sourcemap: true
         EntryPoints:
-          - check-guess-service/index.ts
+          - index.ts
 
   Guesses:
     Type: AWS::DynamoDB::Table

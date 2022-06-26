@@ -4,4 +4,4 @@ import BitcoinPriceHistoryRepository from './repositories/BitcoinPriceHistoryRep
 const bitcoinPriceHistoryRepository = new BitcoinPriceHistoryRepository('btcPrices');
 const checkGuessService = new CheckGuessService(bitcoinPriceHistoryRepository);
 
-export const checkGuessServiceHandler = checkGuessService.execute;
+export const checkGuessServiceHandler = checkGuessService.execute.bind(checkGuessService);
