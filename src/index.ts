@@ -3,12 +3,12 @@ import { LoadPlayerService } from './load-player-service/LoadPlayerService';
 import BitcoinPriceHistoryRepository from './repositories/BitcoinPriceHistoryRepository';
 import GuessesRepository from './repositories/GuessesRepository';
 
-const bitcoinPriceTableName = process.env.BTCPRICES_TABLE_NAME;
+const bitcoinPriceTableName = 'will-it-crash-BtcPrices-1P1IREXU8PGB0'; //process.env.BTCPRICES_TABLE_NAME;
 if (!bitcoinPriceTableName) {
     throw new Error('BTCPRICES_TABLE_NAME env variable was not set');
 }
 
-const guessesTableName = process.env.GUESSES_TABLE_NAME;
+const guessesTableName = 'will-it-crash-Guesses-K6XHIQ9VU1D0'; //process.env.GUESSES_TABLE_NAME;
 if (!guessesTableName) {
     throw new Error('GUESSES_TABLE_NAME env variable was not set');
 }

@@ -1,14 +1,14 @@
 interface GuessConstructorParams {
     playerId: string;
-    guessedCorrectly: boolean;
+    guesses: boolean[];
 }
 
 export default class Guess {
     public playerId: string;
-    public guessedCorrectly: boolean;
+    public guesses: boolean[];
 
-    constructor({ playerId, guessedCorrectly }: GuessConstructorParams) {
+    constructor({ playerId, guesses }: GuessConstructorParams) {
         this.playerId = playerId;
-        this.guessedCorrectly = guessedCorrectly;
+        this.guesses = guesses;
     }
 }

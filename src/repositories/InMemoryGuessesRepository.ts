@@ -1,5 +1,5 @@
 import Guess from '../models/Guess';
-import IGuessesRepository from './IGuessesRepository';
+import IGuessesRepository, { CreateGuessParam } from './IGuessesRepository';
 
 export default class InMemoryGuessesRepository implements IGuessesRepository {
     private guesses: Guess[];
@@ -8,11 +8,19 @@ export default class InMemoryGuessesRepository implements IGuessesRepository {
         this.guesses = [];
     }
 
-    async getPlayerGuesses(playerId: string): Promise<Guess[]> {
-        return this.guesses.filter((guess) => guess.playerId === playerId);
+    async getPlayerGuesses(playerId: string): Promise<Guess | null> {
+        const playerGuesses = this.guesses.find((guess) => guess.playerId === playerId);
+
+        return playerGuesses || null;
     }
 
-    async createGuess(guessData: Guess): Promise<void> {
-        this.guesses.push(guessData);
+    async createGuess(guessData: CreateGuessParam) {
+        const playerGuesses = this.guesses.find((guess) => guess.playerId === guessData.playerId);
+        if (!playerGuesses) {
+            this.guesses.push({ playerId: guessData.playerId, guesses: [guessData.correctGuess] });
+            return;
+        }
+
+        playerGuesses.guesses.push(guessData.correctGuess);
     }
 }

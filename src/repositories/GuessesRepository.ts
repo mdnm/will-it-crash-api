@@ -1,6 +1,6 @@
 import dynamodb from 'aws-sdk/clients/dynamodb';
 import Guess from '../models/Guess';
-import IGuessesRepository from './IGuessesRepository';
+import IGuessesRepository, { CreateGuessParam } from './IGuessesRepository';
 
 export default class GuessesRepository implements IGuessesRepository {
     private dynamodbClient: dynamodb.DocumentClient;
@@ -11,37 +11,39 @@ export default class GuessesRepository implements IGuessesRepository {
         this.dynamodbClient = new dynamodb.DocumentClient();
     }
 
-    async getPlayerGuesses(playerId: string): Promise<Guess[]> {
-        const { Items } = await this.dynamodbClient
-            .query({
+    async getPlayerGuesses(playerId: string) {
+        const { Item } = await this.dynamodbClient
+            .get({
                 TableName: this.tableName,
-                KeyConditionExpression: 'playerId = :playerId',
-                ExpressionAttributeValues: {
-                    ':playerId': { S: playerId },
+                Key: {
+                    playerId,
                 },
             })
             .promise();
 
-        if (!Items) {
-            return [];
+        if (!Item) {
+            return null;
         }
 
-        return Items.map(
-            (item) =>
-                new Guess({
-                    playerId,
-                    guessedCorrectly: Boolean(item.guessedCorrectly.S),
-                }),
-        );
+        return new Guess({
+            playerId,
+            guesses: Item.guesses,
+        });
     }
 
-    async createGuess({ playerId, guessedCorrectly }: Guess): Promise<void> {
+    async createGuess({ playerId, correctGuess }: CreateGuessParam) {
         await this.dynamodbClient
-            .put({
+            .update({
                 TableName: this.tableName,
-                Item: {
+                Key: {
                     playerId,
-                    guessedCorrectly,
+                },
+                UpdateExpression: 'SET #guesses = list_append(if_not_exists(#guesses, :new_guess), :new_guess)',
+                ExpressionAttributeNames: {
+                    '#guesses': 'guesses',
+                },
+                ExpressionAttributeValues: {
+                    ':new_guess': [correctGuess],
                 },
             })
             .promise();

@@ -19,7 +19,7 @@ Resources:
       Runtime: nodejs16.x
       Architectures:
         - x86_64
-      MemorySize: 256
+      MemorySize: 512
       Timeout: 100
       Policies:
         - DynamoDBCrudPolicy:
@@ -48,7 +48,7 @@ Resources:
       Runtime: nodejs16.x
       Architectures:
         - x86_64
-      MemorySize: 256
+      MemorySize: 512
       Timeout: 100
       Policies:
         - DynamoDBCrudPolicy:

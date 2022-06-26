@@ -59,13 +59,18 @@ export class CheckGuessService {
             const currentBtcPriceData = await this.bitcoinPriceHistoryRepository.getCurrentPriceTimestampPair();
 
             const guessedCorrectly = this.getGuessAnswer(currentBtcPriceData, lastBtcPriceData, requestBody.guess);
-            await this.guessesRepository.createGuess({ playerId: requestBody.playerId, guessedCorrectly });
+            await this.guessesRepository.createGuess({
+                playerId: requestBody.playerId,
+                correctGuess: guessedCorrectly,
+            });
             const playerGuesses = await this.guessesRepository.getPlayerGuesses(requestBody.playerId);
-            const newScore = playerGuesses.reduce((sum, current) => {
-                if (current.guessedCorrectly) return sum + 1;
+            const newScore = playerGuesses?.guesses.reduce((finalScore, correctGuess) => {
+                if (correctGuess) return finalScore + 1;
 
-                return sum - 1;
+                return finalScore - 1;
             }, 0);
+
+            await this.bitcoinPriceHistoryRepository.createPriceTimestampPair(currentBtcPriceData);
 
             response = {
                 statusCode: 200,
@@ -76,8 +81,6 @@ export class CheckGuessService {
                     newTimestamp: currentBtcPriceData.timestamp,
                 }),
             };
-
-            await this.bitcoinPriceHistoryRepository.createPriceTimestampPair(currentBtcPriceData);
         } catch (err: HttpError | any) {
             if (isHttpError(err)) {
                 response = {
