@@ -1,11 +1,11 @@
 export default class CheckGuessServiceBody {
-    public id: string;
+    public playerId: string;
     public guess: 'yes' | 'no';
     public btcPrice: number;
     public lastGuessTimestamp: number;
 
-    constructor({ id, guess, btcPrice, lastGuessTimestamp }: CheckGuessServiceBody) {
-        this.id = id;
+    constructor({ playerId, guess, btcPrice, lastGuessTimestamp }: CheckGuessServiceBody) {
+        this.playerId = playerId;
         this.guess = guess;
         this.btcPrice = btcPrice;
         this.lastGuessTimestamp = lastGuessTimestamp;
@@ -15,7 +15,7 @@ export default class CheckGuessServiceBody {
         const isGuessValid = this.guess === 'yes' || this.guess === 'no';
 
         return (
-            typeof this.id === 'string' &&
+            typeof this.playerId === 'string' &&
             isGuessValid &&
             typeof this.btcPrice === 'number' &&
             typeof this.lastGuessTimestamp === 'number'

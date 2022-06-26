@@ -23,7 +23,7 @@ export default class InMemoryBitcoinPriceHistoryRepository implements IBitcoinPr
     }
 
     async getCurrentPriceTimestampPair() {
-        const lastPriceData = this.bitcoinPrices[this.bitcoinPrices.length - 1];
+        const lastPriceData = this.bitcoinPrices[this.bitcoinPrices.length - 1] || { price: 1, timestamp: Date.now() };
         const newPrice = this.alwaysCrashPrices ? lastPriceData.price - 1 : lastPriceData.price + 1;
 
         return new BitcoinPriceData({

@@ -23,8 +23,6 @@ Resources:
       Timeout: 100
       Policies:
         - DynamoDBCrudPolicy:
-            TableName: !Ref Guesses
-        - DynamoDBCrudPolicy:
             TableName: !Ref BtcPrices
       Events:
         Guess:
@@ -32,6 +30,35 @@ Resources:
           Properties:
             Path: /guess
             Method: post
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Minify: true
+        Target: "es2020"
+        Sourcemap: true
+        EntryPoints:
+          - index.ts
+  LoadPlayerService:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: src/
+      Handler: src/index.loadPlayerServiceHandler
+      Runtime: nodejs16.x
+      Architectures:
+        - x86_64
+      MemorySize: 256
+      Timeout: 100
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref Guesses
+        - DynamoDBCrudPolicy:
+            TableName: !Ref BtcPrices
+      Events:
+        LoadPlayer:
+          Type: Api
+          Properties:
+            Path: /load-player
+            Method: get
     Metadata:
       BuildMethod: esbuild
       BuildProperties:
@@ -71,11 +98,20 @@ Resources:
     DeletionPolicy: Delete
 Outputs:
   CheckGuessServiceApi:
-    Description: "API Gateway endpoint URL for Prod stage for CheckGuessService"
-    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/guess/"
+    Description: "API Gateway endpoint URL for CheckGuessService"
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/guess/"
   CheckGuessService:
     Description: "CheckGuessService Lambda Function ARN"
     Value: !GetAtt CheckGuessService.Arn
   CheckGuessServiceIamRole:
     Description: "Implicit IAM Role created for CheckGuessService"
     Value: !GetAtt CheckGuessServiceRole.Arn
+  LoadPlayerServiceApi:
+    Description: "API Gateway endpoint URL for LoadPlayerService"
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/load-player/"
+  LoadPlayerService:
+    Description: "LoadPlayerService Lambda Function ARN"
+    Value: !GetAtt LoadPlayerService.Arn
+  LoadPlayerServiceIamRole:
+    Description: "Implicit IAM Role created for LoadPlayerService"
+    Value: !GetAtt LoadPlayerServiceRole.Arn

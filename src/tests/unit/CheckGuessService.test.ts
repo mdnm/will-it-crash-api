@@ -1,77 +1,28 @@
-import { APIGatewayProxyEvent } from 'aws-lambda';
 import { CheckGuessService } from '../../check-guess-service/CheckGuessService';
 import CheckGuessServiceBody from '../../check-guess-service/CheckGuessServiceBody';
 import InMemoryBitcoinPriceHistoryRepository from '../../repositories/InMemoryBitcoinPriceHistoryRepository';
-
-type EventFactoryParams = { method: string; body: string | null };
-function eventFactory({ method, body }: EventFactoryParams): APIGatewayProxyEvent {
-    return {
-        httpMethod: method,
-        body,
-        headers: {},
-        isBase64Encoded: false,
-        multiValueHeaders: {},
-        multiValueQueryStringParameters: {},
-        path: '/guess',
-        pathParameters: {},
-        queryStringParameters: {},
-        requestContext: {
-            accountId: '123456789012',
-            apiId: '1234',
-            authorizer: {},
-            httpMethod: method,
-            identity: {
-                accessKey: '',
-                accountId: '',
-                apiKey: '',
-                apiKeyId: '',
-                caller: '',
-                clientCert: {
-                    clientCertPem: '',
-                    issuerDN: '',
-                    serialNumber: '',
-                    subjectDN: '',
-                    validity: { notAfter: '', notBefore: '' },
-                },
-                cognitoAuthenticationProvider: '',
-                cognitoAuthenticationType: '',
-                cognitoIdentityId: '',
-                cognitoIdentityPoolId: '',
-                principalOrgId: '',
-                sourceIp: '',
-                user: '',
-                userAgent: '',
-                userArn: '',
-            },
-            path: '/guess',
-            protocol: 'HTTP/1.1',
-            requestId: 'c6af9ac6-7b61-11e6-9a41-93e8deadbeef',
-            requestTimeEpoch: 1428582896000,
-            resourceId: '123456',
-            resourcePath: '/guess',
-            stage: 'testing',
-        },
-        resource: '',
-        stageVariables: {},
-    };
-}
+import InMemoryGuessesRepository from '../../repositories/InMemoryGuessesRepository';
+import eventFactory from '../utils/eventFactory';
 
 type CheckGuessServiceBodyFields = Omit<CheckGuessServiceBody, 'isValid'>;
 
 describe('Check Guess Service Unit tests', function () {
     let checkGuessService: CheckGuessService;
+    let inMemoryGuessesRepository: InMemoryGuessesRepository;
     let inMemoryBitcoinPriceHistoryRepository: InMemoryBitcoinPriceHistoryRepository;
 
     beforeEach(() => {
         jest.restoreAllMocks();
         jest.clearAllMocks();
 
+        inMemoryGuessesRepository = new InMemoryGuessesRepository();
         inMemoryBitcoinPriceHistoryRepository = new InMemoryBitcoinPriceHistoryRepository();
-        checkGuessService = new CheckGuessService(inMemoryBitcoinPriceHistoryRepository);
+        checkGuessService = new CheckGuessService(inMemoryGuessesRepository, inMemoryBitcoinPriceHistoryRepository);
     });
 
     it('should return status 405 given the method is not POST', async () => {
         const event = eventFactory({
+            path: '/guess',
             method: 'GET',
             body: null,
         });
@@ -82,6 +33,7 @@ describe('Check Guess Service Unit tests', function () {
 
     it('should return status 400 given the body was not sent', async () => {
         const event = eventFactory({
+            path: '/guess',
             method: 'POST',
             body: null,
         });
@@ -92,6 +44,7 @@ describe('Check Guess Service Unit tests', function () {
 
     it('should return status 422 given the body is missing required fields', async () => {
         const event = eventFactory({
+            path: '/guess',
             method: 'POST',
             body: JSON.stringify({ banana: 'is good' }),
         });
@@ -102,6 +55,7 @@ describe('Check Guess Service Unit tests', function () {
 
     it('should return status 422 given the body fields do not have the correct types', async () => {
         const event = eventFactory({
+            path: '/guess',
             method: 'POST',
             body: JSON.stringify({
                 id: 1,
@@ -117,12 +71,13 @@ describe('Check Guess Service Unit tests', function () {
 
     it('should return status 400 given the no pair of price and timestamp was found', async () => {
         const body: CheckGuessServiceBodyFields = {
-            id: '1',
+            playerId: '1',
             guess: 'yes',
             btcPrice: 1,
             lastGuessTimestamp: Date.now(),
         };
         const event = eventFactory({
+            path: '/guess',
             method: 'POST',
             body: JSON.stringify(body),
         });
@@ -132,57 +87,87 @@ describe('Check Guess Service Unit tests', function () {
         expect(result.statusCode).toEqual(400);
     });
 
-    it('should return status 200 and guessedCorrectly as true given the guess is yes and the price crashed', async () => {
-        const lastGuessTimestamp = Date.now();
-        const btcPrice = 1;
+    it('should return status 200, add 1 to the score and return guessedCorrectly as true given the guess is yes and the price crashed', async () => {
+        const body: CheckGuessServiceBodyFields = {
+            playerId: '1',
+            guess: 'yes',
+            btcPrice: 1,
+            lastGuessTimestamp: Date.now(),
+        };
 
         inMemoryBitcoinPriceHistoryRepository.setAlwaysCrashPrices(true);
         inMemoryBitcoinPriceHistoryRepository.createPriceTimestampPair({
-            price: btcPrice,
-            timestamp: lastGuessTimestamp,
+            price: body.btcPrice,
+            timestamp: body.lastGuessTimestamp,
         });
 
-        const body: CheckGuessServiceBodyFields = {
-            id: '1',
-            guess: 'yes',
-            btcPrice,
-            lastGuessTimestamp,
-        };
         const event = eventFactory({
+            path: '/guess',
             method: 'POST',
             body: JSON.stringify(body),
         });
 
         const result = await checkGuessService.execute(event);
+        const resultBody = JSON.parse(result.body);
 
         expect(result.statusCode).toEqual(200);
-        expect(JSON.parse(result.body).guessedCorrectly).toEqual(true);
+        expect(resultBody.guessedCorrectly).toEqual(true);
+        expect(resultBody.newScore).toEqual(1);
     });
 
-    it('should return status 200 and guessedCorrectly as true given the guess is no and the price rose', async () => {
-        const lastGuessTimestamp = Date.now();
-        const btcPrice = 1;
+    it('should return status 200, add 1 to the score and return guessedCorrectly as true given the guess is no and the price rose', async () => {
+        const body: CheckGuessServiceBodyFields = {
+            playerId: '1',
+            guess: 'no',
+            btcPrice: 1,
+            lastGuessTimestamp: Date.now(),
+        };
 
         inMemoryBitcoinPriceHistoryRepository.setAlwaysCrashPrices(false);
         inMemoryBitcoinPriceHistoryRepository.createPriceTimestampPair({
-            price: btcPrice,
-            timestamp: lastGuessTimestamp,
+            price: body.btcPrice,
+            timestamp: body.lastGuessTimestamp,
         });
 
-        const body: CheckGuessServiceBodyFields = {
-            id: '1',
-            guess: 'no',
-            btcPrice,
-            lastGuessTimestamp,
-        };
         const event = eventFactory({
+            path: '/guess',
             method: 'POST',
             body: JSON.stringify(body),
         });
 
         const result = await checkGuessService.execute(event);
+        const resultBody = JSON.parse(result.body);
 
         expect(result.statusCode).toEqual(200);
-        expect(JSON.parse(result.body).guessedCorrectly).toEqual(true);
+        expect(resultBody.guessedCorrectly).toEqual(true);
+        expect(resultBody.newScore).toEqual(1);
+    });
+
+    it('should return status 200, subtract 1 of the score and return guessedCorrectly as false given the guess is no and the price crashed', async () => {
+        const body: CheckGuessServiceBodyFields = {
+            playerId: '1',
+            guess: 'no',
+            btcPrice: 1,
+            lastGuessTimestamp: Date.now(),
+        };
+
+        inMemoryBitcoinPriceHistoryRepository.setAlwaysCrashPrices(true);
+        inMemoryBitcoinPriceHistoryRepository.createPriceTimestampPair({
+            price: body.btcPrice,
+            timestamp: body.lastGuessTimestamp,
+        });
+
+        const event = eventFactory({
+            path: '/guess',
+            method: 'POST',
+            body: JSON.stringify(body),
+        });
+
+        const result = await checkGuessService.execute(event);
+        const resultBody = JSON.parse(result.body);
+
+        expect(result.statusCode).toEqual(200);
+        expect(resultBody.guessedCorrectly).toEqual(false);
+        expect(resultBody.newScore).toEqual(-1);
     });
 });

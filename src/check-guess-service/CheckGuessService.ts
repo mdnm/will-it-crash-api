@@ -1,13 +1,16 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 import BitcoinPriceData from '../models/BitcoinPriceData';
 import IBitcoinPriceHistoryRepository from '../repositories/IBitcoinPriceHistoryRepository';
+import IGuessesRepository from '../repositories/IGuessesRepository';
 import { HttpError, isHttpError } from '../utils/http-error';
 import CheckGuessServiceBody from './CheckGuessServiceBody';
 
 export class CheckGuessService {
     private bitcoinPriceHistoryRepository: IBitcoinPriceHistoryRepository;
+    private guessesRepository: IGuessesRepository;
 
-    constructor(bitcoinPriceHistoryRepository: IBitcoinPriceHistoryRepository) {
+    constructor(guessesRepository: IGuessesRepository, bitcoinPriceHistoryRepository: IBitcoinPriceHistoryRepository) {
+        this.guessesRepository = guessesRepository;
         this.bitcoinPriceHistoryRepository = bitcoinPriceHistoryRepository;
     }
 
@@ -56,11 +59,19 @@ export class CheckGuessService {
             const currentBtcPriceData = await this.bitcoinPriceHistoryRepository.getCurrentPriceTimestampPair();
 
             const guessedCorrectly = this.getGuessAnswer(currentBtcPriceData, lastBtcPriceData, requestBody.guess);
+            await this.guessesRepository.createGuess({ playerId: requestBody.playerId, guessedCorrectly });
+            const playerGuesses = await this.guessesRepository.getPlayerGuesses(requestBody.playerId);
+            const newScore = playerGuesses.reduce((sum, current) => {
+                if (current.guessedCorrectly) return sum + 1;
+
+                return sum - 1;
+            }, 0);
 
             response = {
                 statusCode: 200,
                 body: JSON.stringify({
                     guessedCorrectly,
+                    newScore,
                     currentBtcPrice: currentBtcPriceData.price,
                     newTimestamp: currentBtcPriceData.timestamp,
                 }),
