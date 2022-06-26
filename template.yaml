@@ -3,6 +3,13 @@ Transform: AWS::Serverless-2016-10-31
 Description: >
   will-it-crash-functions
 
+Globals:
+  Function:
+    Environment:
+      Variables:
+        GUESSES_TABLE_NAME: !Ref Guesses
+        BTCPRICES_TABLE_NAME: !Ref BtcPrices
+
 Resources:
   CheckGuessService:
     Type: AWS::Serverless::Function

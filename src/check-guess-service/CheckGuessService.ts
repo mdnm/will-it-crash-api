@@ -68,8 +68,6 @@ export class CheckGuessService {
 
             await this.bitcoinPriceHistoryRepository.createPriceTimestampPair(currentBtcPriceData);
         } catch (err: HttpError | any) {
-            console.error('ERROR ===== ', err);
-
             if (isHttpError(err)) {
                 response = {
                     statusCode: err.statusCode,
