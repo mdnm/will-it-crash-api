@@ -45,7 +45,7 @@ export default class BitcoinPriceHistoryRepository implements IBitcoinPriceHisto
     }
 
     async createPriceTimestampPair({ price, timestamp }: BitcoinPriceData): Promise<void> {
-        this.dynamodbClient
+        await this.dynamodbClient
             .put({
                 TableName: this.tableName,
                 Item: {

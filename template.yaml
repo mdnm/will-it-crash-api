@@ -23,6 +23,8 @@ Resources:
       Timeout: 100
       Policies:
         - DynamoDBCrudPolicy:
+            TableName: !Ref Guesses
+        - DynamoDBCrudPolicy:
             TableName: !Ref BtcPrices
       Events:
         Guess:

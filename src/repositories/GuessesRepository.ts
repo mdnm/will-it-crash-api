@@ -36,7 +36,7 @@ export default class GuessesRepository implements IGuessesRepository {
     }
 
     async createGuess({ playerId, guessedCorrectly }: Guess): Promise<void> {
-        this.dynamodbClient
+        await this.dynamodbClient
             .put({
                 TableName: this.tableName,
                 Item: {
