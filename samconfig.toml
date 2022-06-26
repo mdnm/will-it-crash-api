@@ -1,0 +1,11 @@
+version = 0.1
+[production]
+[production.deploy]
+[production.deploy.parameters]
+stack_name = "will-it-crash-prod"
+s3_bucket = "aws-sam-cli-managed-default-samclisourcebucket-3d31k13rov1v"
+s3_prefix = "will-it-crash-prod"
+region = "us-east-1"
+confirm_changeset = true
+capabilities = "CAPABILITY_IAM"
+image_repositories = []

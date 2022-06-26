@@ -34,7 +34,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: ./check-guess-service
+        working-directory: ./src
     steps:
       - uses: actions/checkout@v2
       - name: Install dependencies

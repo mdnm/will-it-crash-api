@@ -1,5 +1,5 @@
 {
-    "name": "check-guess-service",
+    "name": "will-it-crash-functions",
     "version": "1.0.0",
     "description": "",
     "main": "app.js",
@@ -28,6 +28,7 @@
         "typescript": "^4.5.5"
     },
     "dependencies": {
+        "aws-sdk": "^2.1162.0",
         "axios": "^0.27.2"
     }
 }
