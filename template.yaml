@@ -45,6 +45,8 @@ Resources:
         - AttributeName: playerId
           AttributeType: S
       BillingMode: PAY_PER_REQUEST
+    UpdateReplacePolicy: Retain
+    DeletionPolicy: Delete
   BtcPrices:
     Type: AWS::DynamoDB::Table
     Properties:
@@ -60,6 +62,8 @@ Resources:
         - AttributeName: timestamp
           AttributeType: N
       BillingMode: PAY_PER_REQUEST
+    UpdateReplacePolicy: Retain
+    DeletionPolicy: Delete
 Outputs:
   CheckGuessServiceApi:
     Description: "API Gateway endpoint URL for Prod stage for CheckGuessService"
