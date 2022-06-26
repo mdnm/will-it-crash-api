@@ -63,7 +63,7 @@ export class LoadPlayerService {
         console.info(`response from: ${event.path} statusCode: ${response.statusCode} body: ${response.body}`);
         response.headers = {
             'Access-Control-Allow-Headers': 'Content-Type',
-            'Access-Control-Allow-Origin': 'https://www.willitcrash.co.uk',
+            'Access-Control-Allow-Origin': '*',
             'Access-Control-Allow-Methods': 'OPTIONS,POST,GET',
         };
         return response;
