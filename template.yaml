@@ -44,7 +44,6 @@ Resources:
   Guesses:
     Type: AWS::DynamoDB::Table
     Properties:
-      TableName: guesses
       KeySchema:
         - AttributeName: playerId
           KeyType: HASH
@@ -57,7 +56,6 @@ Resources:
   BtcPrices:
     Type: AWS::DynamoDB::Table
     Properties:
-      TableName: btcPrices
       KeySchema:
         - AttributeName: price
           KeyType: HASH
