@@ -38,12 +38,13 @@ export default class GuessesRepository implements IGuessesRepository {
                 Key: {
                     playerId,
                 },
-                UpdateExpression: 'SET #guesses = list_append(if_not_exists(#guesses, :new_guess), :new_guess)',
+                UpdateExpression: 'SET #guesses = list_append(if_not_exists(#guesses, :new_guess), :empty_list)',
                 ExpressionAttributeNames: {
                     '#guesses': 'guesses',
                 },
                 ExpressionAttributeValues: {
                     ':new_guess': [correctGuess],
+                    ':empty_list': [],
                 },
             })
             .promise();

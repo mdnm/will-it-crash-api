@@ -28,8 +28,8 @@ export default class BitcoinPriceHistoryRepository implements IBitcoinPriceHisto
         }
 
         return new BitcoinPriceData({
-            price: Number(Item.price.N),
-            timestamp: Number(Item.timestamp.N),
+            price: Item.price,
+            timestamp: Item.timestamp,
         });
     }
 
