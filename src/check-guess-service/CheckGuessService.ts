@@ -97,9 +97,11 @@ export class CheckGuessService {
 
         console.info(`response from: ${event.path} statusCode: ${response.statusCode} body: ${response.body}`);
         response.headers = {
-            'Access-Control-Allow-Headers': 'Content-Type',
+            'Access-Control-Allow-Headers': 'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token',
             'Access-Control-Allow-Origin': '*',
             'Access-Control-Allow-Methods': 'OPTIONS,POST,GET',
+            'Access-Control-Allow-Credentials': true,
+            'Content-Type': 'application/json',
         };
         return response;
     }
