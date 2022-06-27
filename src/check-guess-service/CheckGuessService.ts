@@ -2,7 +2,7 @@ import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 import BitcoinPriceData from '../models/BitcoinPriceData';
 import IBitcoinPriceHistoryRepository from '../repositories/IBitcoinPriceHistoryRepository';
 import IGuessesRepository from '../repositories/IGuessesRepository';
-import { HttpError, isHttpError } from '../utils/http-error';
+import { getCorsHeaders, HttpError, isHttpError } from '../utils/http';
 import CheckGuessServiceBody from './CheckGuessServiceBody';
 
 export class CheckGuessService {
@@ -49,6 +49,13 @@ export class CheckGuessService {
                 throw {
                     statusCode: 405,
                     message: `checkGuessService only accept POST method, you tried: ${event.httpMethod}`,
+                };
+            }
+            if (event.httpMethod !== 'POST') {
+                return {
+                    statusCode: 204,
+                    body: '',
+                    headers: getCorsHeaders(),
                 };
             }
 
@@ -98,13 +105,7 @@ export class CheckGuessService {
         }
 
         console.info(`response from: ${event.path} statusCode: ${response.statusCode} body: ${response.body}`);
-        response.headers = {
-            'Access-Control-Allow-Headers': 'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token',
-            'Access-Control-Allow-Origin': '*',
-            'Access-Control-Allow-Methods': 'OPTIONS,POST,GET',
-            'Access-Control-Allow-Credentials': true,
-            'Content-Type': 'application/json',
-        };
+        response.headers = getCorsHeaders();
         return response;
     }
 

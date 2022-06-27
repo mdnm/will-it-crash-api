@@ -2,7 +2,7 @@ import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 import crypto from 'crypto';
 import IBitcoinPriceHistoryRepository from '../repositories/IBitcoinPriceHistoryRepository';
 import IGuessesRepository from '../repositories/IGuessesRepository';
-import { HttpError, isHttpError } from '../utils/http-error';
+import { getCorsHeaders, HttpError, isHttpError } from '../utils/http';
 
 export class LoadPlayerService {
     private guessesRepository: IGuessesRepository;
@@ -61,11 +61,7 @@ export class LoadPlayerService {
         }
 
         console.info(`response from: ${event.path} statusCode: ${response.statusCode} body: ${response.body}`);
-        response.headers = {
-            'Access-Control-Allow-Headers': 'Content-Type',
-            'Access-Control-Allow-Origin': '*',
-            'Access-Control-Allow-Methods': 'OPTIONS,POST,GET',
-        };
+        response.headers = getCorsHeaders();
         return response;
     }
 }
