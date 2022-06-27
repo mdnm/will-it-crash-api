@@ -23,7 +23,7 @@ describe('Check Guess Service Unit tests', function () {
     it('should return status 405 given the method is not POST', async () => {
         const event = eventFactory({
             path: '/guess',
-            method: 'GET',
+            method: 'DELETE',
             body: null,
         });
         const result = await checkGuessService.execute(event);

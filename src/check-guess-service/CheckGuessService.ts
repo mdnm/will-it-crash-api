@@ -8,10 +8,12 @@ import CheckGuessServiceBody from './CheckGuessServiceBody';
 export class CheckGuessService {
     private bitcoinPriceHistoryRepository: IBitcoinPriceHistoryRepository;
     private guessesRepository: IGuessesRepository;
+    private allowedHttpMethods: string[];
 
     constructor(guessesRepository: IGuessesRepository, bitcoinPriceHistoryRepository: IBitcoinPriceHistoryRepository) {
         this.guessesRepository = guessesRepository;
         this.bitcoinPriceHistoryRepository = bitcoinPriceHistoryRepository;
+        this.allowedHttpMethods = ['GET', 'OPTIONS', 'POST'];
     }
 
     private parseEventBodyOrFail(event: APIGatewayProxyEvent) {
@@ -43,7 +45,7 @@ export class CheckGuessService {
         let response: APIGatewayProxyResult;
 
         try {
-            if (event.httpMethod !== 'POST') {
+            if (!this.allowedHttpMethods.includes(event.httpMethod)) {
                 throw {
                     statusCode: 405,
                     message: `checkGuessService only accept POST method, you tried: ${event.httpMethod}`,
