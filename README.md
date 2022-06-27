@@ -1,6 +1,6 @@
 # will-it-crash-api
 
-The front-end's repository of this application can be found [here](https://github.com/mdnm/will-it-crash)
+The front-end repository of this application can be found [here](https://github.com/mdnm/will-it-crash)
 
 This project contains source code and supporting files for a serverless application that you can deploy with the SAM CLI. It includes the following files and folders
 
